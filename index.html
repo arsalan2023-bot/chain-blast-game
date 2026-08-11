@@ -138,7 +138,8 @@
 
   /* ---------- ROADMAP ---------- */
   #view-map { width: 100%; }
-  .map-scroll { flex: 1; width: 100%; max-width: 460px; overflow-y: auto; overflow-x: hidden; padding: 10px 0 30px; }
+  .map-scroll { flex: 1; width: 100%; max-width: 460px; overflow-y: auto; overflow-x: hidden; padding: 10px 0 100px; }
+  .tab-panel.hidden { display: none; }
   .feature-card {
     margin: 6px 16px 14px; background: var(--panel); border-radius: 18px; padding: 14px 16px;
     box-shadow: 0 4px 0 var(--panel-line), 0 8px 16px rgba(0,0,0,0.15);
@@ -148,18 +149,38 @@
   .feature-card .fc-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .feature-card .fc-reward { font-family: var(--sans); font-weight:700; font-size: 12.5px; color: var(--text-dim); }
 
-  .wheel-wrap { display:flex; align-items:center; gap:14px; }
-  .wheel {
-    width: 84px; height: 84px; border-radius: 50%; flex-shrink:0;
-    background: conic-gradient(#f2c94c 0deg 45deg, #6fc23c 45deg 90deg, #4a90d9 90deg 135deg, #eb5757 135deg 180deg, #9b51e0 180deg 225deg, #d8cba8 225deg 270deg, #f2c94c 270deg 315deg, #6fc23c 315deg 360deg);
-    border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    position: relative; transition: transform 2.4s cubic-bezier(.15,.8,.2,1);
+  .mini-wheel {
+    position: fixed; left: 16px; bottom: 82px; z-index: 12;
+    width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; cursor: pointer;
+    background: conic-gradient(#f2c94c 0deg 45deg, #6fc23c 45deg 90deg, #4a90d9 90deg 135deg, #eb5757 135deg 180deg, #9b51e0 180deg 225deg, #ff8a4c 225deg 270deg, #f2c94c 270deg 315deg, #6fc23c 315deg 360deg);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    transition: transform 2.4s cubic-bezier(.15,.8,.2,1);
   }
-  .wheel::after { content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:10px solid #3d3126; }
+  .mini-wheel::after { content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:11px solid #3d3126; }
+  .mini-wheel::before { content:'🎡'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+  .mini-wheel.disabled { filter: grayscale(0.8) brightness(0.7); pointer-events: none; }
+
+  .bottom-tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 11;
+    display: flex; padding: 8px 10px calc(env(safe-area-inset-bottom,8px) + 8px);
+    background: linear-gradient(90deg, #ff8a4c, #f2ab1f 35%, #6fc23c 68%, #4a90d9);
+    box-shadow: 0 -6px 16px rgba(0,0,0,0.25);
+    gap: 8px;
+  }
+  .tab-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: rgba(255,255,255,0.18); border: none; border-radius: 14px; padding: 8px 4px;
+    font-family: var(--title); font-weight: 700; font-size: 11px; color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25); cursor: pointer;
+  }
+  .tab-btn .tab-icon { font-size: 19px; }
+  .tab-btn.active { background: rgba(255,255,255,0.92); color: #5a3600; text-shadow: none; }
+
 
   .mystery-rock {
     position: absolute; top: 8px; right: 18px; z-index: 8;
     width: 52px; height: 52px; cursor: pointer;
+    background-color: #8c8478;
     background-image: url('rock.jpg'); background-size: 190%; background-position: 52% 46%;
     border-radius: 46% 54% 51% 49% / 48% 44% 56% 52%;
     box-shadow: 0 6px 0 #5c554a, 0 10px 16px rgba(0,0,0,0.35), 0 0 0 5px rgba(255,214,107,0.4);
@@ -183,6 +204,7 @@
     border-radius: 46% 54% 51% 49% / 48% 44% 56% 52%;
     display: flex; align-items: center; justify-content: center;
     font-family: var(--title); font-weight: 800; font-size: 20px;
+    background-color: #8c8478;
     background-image: url('rock.jpg');
     background-size: 190%; background-position: 52% 46%; background-repeat: no-repeat;
     color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); position: relative; cursor: pointer;
@@ -211,7 +233,9 @@
   @keyframes nodeBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
   .tier-tag { position: absolute; top: -10px; right: -8px; background: var(--purple); color: #fff; font-size: 9px; font-family: var(--sans); font-weight: 800; padding: 3px 6px; border-radius: 8px; }
 
-  .char-marker { position: absolute; width: 46px; height: 56px; transform: translate(-50%,-138%); transition: left .6s cubic-bezier(.3,.9,.4,1), top .6s cubic-bezier(.3,.9,.4,1); z-index: 6; pointer-events: none; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.35)); }
+  .char-marker { position: absolute; width: 54px; height: 46px; transform: translate(-50%,-120%); transition: left .6s cubic-bezier(.3,.9,.4,1), top .6s cubic-bezier(.3,.9,.4,1); z-index: 6; pointer-events: none; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.35)); }
+  .dog-tail { transform-origin: 22px 52px; animation: tailWag 0.5s ease-in-out infinite; }
+  @keyframes tailWag { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-18deg); } }
 
   /* ---------- GAME ---------- */
   #view-game { width: 100%; height: 100%; }
@@ -266,11 +290,11 @@
     box-shadow: inset 0 2px 3px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(0,0,0,0.15);
   }
   .token .glyph { font-size: clamp(15px,4vw,20px); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3)); color:#fff; }
-  .tok-blue   { background: linear-gradient(150deg, #8fcdfb, var(--blue) 55%, #2e63a0 100%); }
-  .tok-green  { background: linear-gradient(150deg, #b3f09a, var(--green) 55%, #3f7c26 100%); }
-  .tok-yellow { background: linear-gradient(150deg, #ffe9a3, var(--yellow) 55%, #c4941f 100%); }
-  .tok-red    { background: linear-gradient(150deg, #ffb3b3, var(--red) 55%, #a13a3a 100%); }
-  .tok-purple { background: linear-gradient(150deg, #dcc2f7, var(--purple) 55%, #6b2fa0 100%); }
+  .tok-blue   { background: linear-gradient(150deg, #6ee5ff, #00aaff 55%, #0055c8 100%); box-shadow: 0 0 10px rgba(0,170,255,0.5); }
+  .tok-green  { background: linear-gradient(150deg, #baff5e, #4ade1f 55%, #1f8c00 100%); box-shadow: 0 0 10px rgba(74,222,31,0.5); }
+  .tok-yellow { background: linear-gradient(150deg, #fff37a, #ffcf00 55%, #e08a00 100%); box-shadow: 0 0 10px rgba(255,207,0,0.5); }
+  .tok-red    { background: linear-gradient(150deg, #ff9a9a, #ff2d55 55%, #a30020 100%); box-shadow: 0 0 10px rgba(255,45,85,0.5); }
+  .tok-purple { background: linear-gradient(150deg, #e2a8ff, #b421ff 55%, #5c00a3 100%); box-shadow: 0 0 10px rgba(180,33,255,0.5); }
   .tok-bomb {
     background: radial-gradient(circle at 35% 30%, #6b6b6b, #1c1c1c 75%);
     box-shadow: 0 0 16px rgba(255,214,107,0.85);
@@ -292,6 +316,12 @@
   @keyframes shockAnim { from { width:10px; height:10px; opacity:1; margin:-5px; } to { width:140px; height:140px; opacity:0; margin:-70px; } }
   .beam { position:absolute; background: linear-gradient(90deg, transparent, rgba(143,205,251,0.95), #fff, rgba(143,205,251,0.95), transparent); pointer-events:none; z-index:5; animation: beamAnim .35s ease-out forwards; }
   @keyframes beamAnim { from { opacity:0; } 30% { opacity:1; } to { opacity:0; } }
+  .smoke-puff {
+    position:absolute; border-radius:50%; pointer-events:none; z-index:6;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), rgba(160,160,160,0.4) 70%, transparent);
+    animation: smokeRise .7s ease-out forwards;
+  }
+  @keyframes smokeRise { 0% { opacity:0.9; transform: translate(0,0) scale(0.4); } 100% { opacity:0; transform: translate(var(--sx,0px), -46px) scale(1.6); } }
 
   .footer-note { font-family: var(--sans); font-weight:700; font-size: 10px; color: #fff; text-align: center; margin-top: 8px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
@@ -365,32 +395,40 @@
 <!-- ROADMAP -->
 <div class="view" id="view-map">
   <div class="top-bar">
-    <button class="icon-btn" id="shopBtnTop">🛒</button>
+    <div style="width:42px"></div>
     <div class="gems-pill">💎 <span id="gemsVal">0</span></div>
     <button class="icon-btn" id="muteBtnMap">♪</button>
   </div>
   <div class="map-scroll" id="mapScroll">
-    <div class="feature-card">
-      <div class="fc-title">⭐ Daily Challenge</div>
-      <div class="fc-desc" id="dailyDesc">Score 300+ points in a single level.</div>
-      <div class="fc-row">
-        <span class="fc-reward" id="dailyReward">Reward: 50 Gems</span>
-        <button class="btn btn-sm" id="dailyClaimBtn" disabled>Claim</button>
+    <div class="tab-panel" id="panel-map">
+      <div class="roadmap-scene" id="roadmapScene">
+        <svg id="roadSvg"></svg>
+        <div id="roadmapTrack"></div>
+        <div class="mystery-rock hidden" id="mysteryRock"></div>
       </div>
     </div>
-    <div class="feature-card">
-      <div class="fc-title">🎡 Daily Wheel</div>
-      <div class="fc-desc">Spin once a day for a random prize!</div>
-      <div class="wheel-wrap">
-        <div class="wheel" id="wheelEl"></div>
-        <button class="btn btn-sm" id="spinBtn">Spin</button>
+    <div class="tab-panel hidden" id="panel-rewards">
+      <div class="feature-card">
+        <div class="fc-title">⭐ Daily Challenge</div>
+        <div class="fc-desc" id="dailyDesc">Score 300+ points in a single level.</div>
+        <div class="fc-row">
+          <span class="fc-reward" id="dailyReward">Reward: 50 Gems</span>
+          <button class="btn btn-sm" id="dailyClaimBtn" disabled>Claim</button>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-title">🎡 Daily Wheel</div>
+        <div class="fc-desc">Spin once a day for a random prize! Use the floating wheel button bottom-left anytime.</div>
       </div>
     </div>
-    <div class="roadmap-scene" id="roadmapScene">
-      <svg id="roadSvg"></svg>
-      <div id="roadmapTrack"></div>
-      <div class="mystery-rock hidden" id="mysteryRock"></div>
-    </div>
+  </div>
+
+  <button class="mini-wheel" id="spinBtn" title="Daily Spin"></button>
+
+  <div class="bottom-tabbar">
+    <button class="tab-btn active" data-tab="map" id="tabMapBtn"><span class="tab-icon">🗺️</span>Map</button>
+    <button class="tab-btn" data-tab="rewards" id="tabRewardsBtn"><span class="tab-icon">🎁</span>Rewards</button>
+    <button class="tab-btn" data-tab="shop" id="tabShopBtn"><span class="tab-icon">🛒</span>Shop</button>
   </div>
 </div>
 
@@ -614,8 +652,21 @@
     src.connect(filter).connect(gain).connect(audioCtx.destination);
     src.start();
   }
-  const scale=[261.6,293.7,329.6,392.0,440.0,523.3]; let musicStep=0;
-  function musicLoop(){ if(!musicOn) return; const note=scale[musicStep%scale.length]; playTone(note/2,1.8,'sine',0.05,0); if(musicStep%3===0) playTone(note,1.1,'triangle',0.035,0.15); musicStep++; musicTimer=setTimeout(musicLoop,950); }
+  // Adventure-style loop: bouncy bass pulse + a rising melodic motif, faster tempo
+  const ADV_BASS = [98, 98, 130.8, 110];
+  const ADV_MELODY = [392, 440, 523.3, 587.3, 523.3, 440, 493.9, 440];
+  let musicStep=0;
+  function musicLoop(){
+    if(!musicOn) return;
+    const bassNote = ADV_BASS[musicStep % ADV_BASS.length];
+    playTone(bassNote, 0.22, 'triangle', 0.09, 0);
+    playTone(bassNote/2, 0.3, 'sine', 0.07, 0);
+    const mel = ADV_MELODY[musicStep % ADV_MELODY.length];
+    playTone(mel, 0.28, 'square', 0.028, 0.08);
+    if (musicStep % 2 === 0) playTone(mel*1.5, 0.16, 'triangle', 0.02, 0.2);
+    musicStep++;
+    musicTimer = setTimeout(musicLoop, 300);
+  }
   function stopMusic(){ clearTimeout(musicTimer); musicTimer=null; }
   function playMatchSound(count){ if(!audioCtx||!musicOn) return; const base=440+count*30; playTone(base,0.28,'triangle',0.11,0); playTone(base*1.5,0.22,'sine',0.08,0.05); }
   function playBombSound(){
@@ -661,17 +712,18 @@
   function canSpinToday(){ return !save.wheel || save.wheel.date !== todayStr(); }
   function updateSpinBtn(){
     const btn = document.getElementById('spinBtn');
-    if (canSpinToday()){ btn.disabled = false; btn.textContent = 'Spin'; }
-    else { btn.disabled = true; btn.textContent = 'Come back tomorrow'; }
+    if (canSpinToday()){ btn.classList.remove('disabled'); }
+    else { btn.classList.add('disabled'); }
   }
   document.getElementById('spinBtn').addEventListener('click', () => {
     if (!canSpinToday()) return;
     ensureAudio();
+    const btn = document.getElementById('spinBtn');
     const segIndex = Math.floor(Math.random()*WHEEL_SEGMENTS.length);
     const segAngle = 360/WHEEL_SEGMENTS.length;
     const targetAngle = 360*4 + (360 - (segIndex*segAngle + segAngle/2));
-    document.getElementById('wheelEl').style.transform = `rotate(${targetAngle}deg)`;
-    document.getElementById('spinBtn').disabled = true;
+    btn.style.transform = `rotate(${targetAngle}deg)`;
+    btn.classList.add('disabled');
     setTimeout(() => {
       const result = WHEEL_SEGMENTS[segIndex];
       save.gems += result.gems; save.wheel = { date: todayStr() }; writeSave(); playUiSound();
@@ -725,20 +777,37 @@
       if (state === 'current') {
         const marker = document.createElement('div');
         marker.className = 'char-marker';
-        marker.innerHTML = `<svg viewBox="0 0 100 120" width="46" height="56">
-          <ellipse cx="50" cy="112" rx="20" ry="5" fill="rgba(0,0,0,0.25)"/>
-          <path d="M30 70 Q28 100 34 112 L44 112 L46 78 Z" fill="#7a5230"/>
-          <path d="M70 70 Q72 100 66 112 L56 112 L54 78 Z" fill="#7a5230"/>
-          <rect x="30" y="48" width="40" height="34" rx="8" fill="#d9a441"/>
-          <rect x="24" y="52" width="10" height="22" rx="4" fill="#c68a2e"/>
-          <rect x="66" y="52" width="10" height="22" rx="4" fill="#c68a2e"/>
-          <circle cx="50" cy="34" r="20" fill="#f0c08a"/>
-          <path d="M28 28 Q50 4 72 28 Q74 18 50 14 Q26 18 28 28Z" fill="#5b3a21"/>
-          <path d="M24 26 Q50 8 76 26 L76 22 Q50 4 24 22 Z" fill="#7a5230"/>
-          <circle cx="42" cy="35" r="3.6" fill="#2b2b2b"/>
-          <circle cx="58" cy="35" r="3.6" fill="#2b2b2b"/>
-          <path d="M40 44 Q50 50 60 44" stroke="#5b3a21" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-          <rect x="14" y="58" width="14" height="20" rx="5" fill="#8a5a34"/>
+        marker.innerHTML = `<svg viewBox="0 0 120 100" width="54" height="46">
+          <defs>
+            <radialGradient id="dogBody" cx="35%" cy="25%" r="80%">
+              <stop offset="0%" stop-color="#ffcd8a"/>
+              <stop offset="100%" stop-color="#e8a352"/>
+            </radialGradient>
+            <radialGradient id="dogEar" cx="35%" cy="25%" r="80%">
+              <stop offset="0%" stop-color="#c97a3a"/>
+              <stop offset="100%" stop-color="#a05a24"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="58" cy="92" rx="30" ry="6" fill="rgba(0,0,0,0.25)"/>
+          <g class="dog-tail">
+            <path d="M22 58 Q2 50 4 32 Q6 44 24 50 Z" fill="url(#dogBody)" stroke="#c98a4a" stroke-width="1"/>
+          </g>
+          <ellipse cx="60" cy="66" rx="30" ry="20" fill="url(#dogBody)"/>
+          <ellipse cx="34" cy="80" rx="7" ry="11" fill="#e8a352"/>
+          <ellipse cx="86" cy="80" rx="7" ry="11" fill="#e8a352"/>
+          <ellipse cx="34" cy="90" rx="8" ry="4" fill="#fff"/>
+          <ellipse cx="86" cy="90" rx="8" ry="4" fill="#fff"/>
+          <circle cx="86" cy="42" r="24" fill="url(#dogBody)"/>
+          <path d="M66 24 Q60 4 74 10 Q76 20 78 28Z" fill="url(#dogEar)"/>
+          <path d="M104 26 Q116 8 108 18 Q104 26 100 30Z" fill="url(#dogEar)"/>
+          <ellipse cx="94" cy="50" rx="12" ry="9" fill="#fff6e8"/>
+          <ellipse cx="98" cy="50" rx="6" ry="5" fill="#3d2b1a"/>
+          <circle cx="79" cy="36" r="4.2" fill="#2b2018"/>
+          <circle cx="80.4" cy="34.6" r="1.3" fill="#fff"/>
+          <circle cx="97" cy="34" r="4.2" fill="#2b2018"/>
+          <circle cx="98.4" cy="32.6" r="1.3" fill="#fff"/>
+          <path d="M74 44 Q79 48 84 44" stroke="#5c3d1e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M14 66 Q10 76 16 84" stroke="#e8a352" stroke-width="9" fill="none" stroke-linecap="round"/>
         </svg>`;
         wrap.appendChild(marker);
       }
@@ -818,7 +887,15 @@
     document.getElementById('ownMoves').textContent = save.inventory.movesBoost;
   }
   function openShop(){ refreshShopUI(); document.getElementById('shopOverlay').classList.remove('hidden'); }
-  document.getElementById('shopBtnTop').addEventListener('click', openShop);
+  // ================= TABS =================
+  function setActiveTab(name){
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    document.getElementById('panel-map').classList.toggle('hidden', name !== 'map');
+    document.getElementById('panel-rewards').classList.toggle('hidden', name !== 'rewards');
+  }
+  document.getElementById('tabMapBtn').addEventListener('click', () => { playUiSound(); setActiveTab('map'); });
+  document.getElementById('tabRewardsBtn').addEventListener('click', () => { playUiSound(); setActiveTab('rewards'); });
+  document.getElementById('tabShopBtn').addEventListener('click', () => { playUiSound(); openShop(); });
   document.getElementById('preShopBtn').addEventListener('click', openShop);
   document.getElementById('closeShopBtn').addEventListener('click', () => document.getElementById('shopOverlay').classList.add('hidden'));
   document.getElementById('buyBombBtn').addEventListener('click', () => { if (save.gems >= 40){ save.gems -= 40; save.inventory.bombs++; writeSave(); refreshShopUI(); gemsVal.textContent = save.gems; playUiSound(); renderBoostArea(); } });
@@ -1036,18 +1113,34 @@
     const el = cellEl(r,c); const rect = el.getBoundingClientRect(); const brect = boardPixelRect();
     return { x: rect.left+rect.width/2-brect.left, y: rect.top+rect.height/2-brect.top, w: rect.width, h: rect.height };
   }
+  function spawnSmokeAt(x,y,count){
+    for (let i=0;i<(count||6);i++){
+      const puff = document.createElement('div'); puff.className='smoke-puff';
+      const size = 14 + Math.random()*18;
+      puff.style.width = size+'px'; puff.style.height = size+'px';
+      puff.style.left = (x - size/2 + (Math.random()*20-10))+'px';
+      puff.style.top = (y - size/2 + (Math.random()*20-10))+'px';
+      puff.style.setProperty('--sx', (Math.random()*40-20)+'px');
+      puff.style.animationDelay = (Math.random()*0.15)+'s';
+      boardEl.appendChild(puff);
+      setTimeout(()=> puff.remove(), 850);
+    }
+  }
   function spawnShockwave(r,c){
     const p = cellCenterPx(r,c);
     const sw = document.createElement('div'); sw.className='shockwave';
     sw.style.left = p.x+'px'; sw.style.top = p.y+'px';
     boardEl.appendChild(sw);
+    spawnSmokeAt(p.x, p.y, 9);
     setTimeout(()=> sw.remove(), 520);
   }
   function spawnBeam(r,c,dir){
     const brect = boardPixelRect();
     const beam = document.createElement('div'); beam.className='beam';
-    if (dir==='h'){ const p = cellCenterPx(r,0); beam.style.left='0px'; beam.style.top=(p.y-9)+'px'; beam.style.width=brect.width+'px'; beam.style.height='18px'; }
-    else { const p = cellCenterPx(0,c); beam.style.top='0px'; beam.style.left=(p.x-9)+'px'; beam.style.height=brect.height+'px'; beam.style.width='18px'; }
+    if (dir==='h'){ const p = cellCenterPx(r,0); beam.style.left='0px'; beam.style.top=(p.y-9)+'px'; beam.style.width=brect.width+'px'; beam.style.height='18px';
+      for (let cc=0; cc<GRID; cc+=2){ const pp = cellCenterPx(r,cc); spawnSmokeAt(pp.x, pp.y, 2); } }
+    else { const p = cellCenterPx(0,c); beam.style.top='0px'; beam.style.left=(p.x-9)+'px'; beam.style.height=brect.height+'px'; beam.style.width='18px';
+      for (let rr=0; rr<GRID; rr+=2){ const pp = cellCenterPx(rr,c); spawnSmokeAt(pp.x, pp.y, 2); } }
     boardEl.appendChild(beam);
     setTimeout(()=> beam.remove(), 380);
   }
