@@ -192,7 +192,7 @@
     position: absolute; top: 8px; right: 18px; z-index: 8;
     width: 52px; height: 52px; cursor: pointer;
     background-color: #8c8478;
-    background-image: url('rock.jpg'); background-size: 190%; background-position: 52% 46%;
+    background-image: url('rock.jpg'); background-size: 150%; background-position: 50% 42%;
     border-radius: 46% 54% 51% 49% / 48% 44% 56% 52%;
     box-shadow: 0 6px 0 #5c554a, 0 10px 16px rgba(0,0,0,0.35), 0 0 0 5px rgba(255,214,107,0.4);
     animation: mysteryFloat 1.8s ease-in-out infinite;
@@ -215,7 +215,7 @@
     font-family: var(--title); font-weight: 800; font-size: 20px;
     background-color: #8c8478;
     background-image: url('rock.jpg');
-    background-size: 190%; background-position: 52% 46%; background-repeat: no-repeat;
+    background-size: 150%; background-position: 50% 42%; background-repeat: no-repeat;
     color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); position: relative; cursor: pointer;
     box-shadow: 0 7px 0 #5c554a, 0 12px 18px rgba(0,0,0,0.35), inset 0 2px 3px rgba(255,255,255,0.4);
     border: 2px solid rgba(255,255,255,0.35);
@@ -230,9 +230,9 @@
     top: 38%; left: 22%; transform: rotate(-18deg); box-shadow: 14px 9px 0 -0.5px rgba(60,50,35,0.28), 6px 20px 0 -0.8px rgba(60,50,35,0.22);
     z-index: 2;
   }
-  .level-node.done::after { background: rgba(111,194,60,0.42); }
+  .level-node.done::after { background: rgba(111,194,60,0.22); }
   .level-node.done { box-shadow: 0 7px 0 #2e5c1a, 0 12px 18px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.4); }
-  .level-node.current::after { background: rgba(242,171,31,0.4); }
+  .level-node.current::after { background: rgba(242,171,31,0.22); }
   .level-node.current {
     box-shadow: 0 7px 0 #a1650b, 0 0 0 8px rgba(255,214,107,0.35), inset 0 2px 3px rgba(255,255,255,0.5);
     animation: nodeBounce 1.4s ease-in-out infinite;
@@ -831,34 +831,15 @@
   // ================= ROADMAP =================
   const roadmapTrack = document.getElementById('roadmapTrack');
   const gemsVal = document.getElementById('gemsVal');
-  const NODES_PER_TILE = 4;
-  const PATH_X_FRAC = [0.70, 0.58, 0.48, 0.40];
-  const PATH_Y_FRAC = [0.08, 0.35, 0.62, 0.88];
-  const TILE_ASPECT = 914/900;
-  let tileHeightPx = 700;
-  function computeTileHeight(){
-    const w = roadmapTrack.clientWidth || 400;
-    tileHeightPx = w * TILE_ASPECT;
-  }
-  function nodeX(i){
-    const pos = (i-1) % NODES_PER_TILE;
-    return PATH_X_FRAC[pos] * 100;
-  }
-  function nodeY(i){
-    const tile = Math.floor((i-1) / NODES_PER_TILE);
-    const pos = (i-1) % NODES_PER_TILE;
-    return tile * tileHeightPx + PATH_Y_FRAC[pos] * tileHeightPx;
-  }
+  const NODE_SPACING = 122;
+  const WAVE_AMPLITUDE = 25;
+  function nodeX(i){ return 50 + WAVE_AMPLITUDE * Math.sin(i * 0.8) + (Math.sin(i*0.29)*7); }
+  function nodeY(i){ return 50 + (i-1) * NODE_SPACING; }
 
   function renderRoadmap(){
     gemsVal.textContent = save.gems;
-    computeTileHeight();
     roadmapTrack.innerHTML = '';
-    const totalTiles = Math.ceil(TOTAL_MAP_NODES / NODES_PER_TILE);
-    roadmapTrack.style.height = (totalTiles * tileHeightPx + 40) + 'px';
-    roadmapTrack.style.backgroundImage = "url('bg-path-tile.jpg')";
-    roadmapTrack.style.backgroundSize = '100% ' + tileHeightPx + 'px';
-    roadmapTrack.style.backgroundRepeat = 'repeat-y';
+    roadmapTrack.style.height = (nodeY(TOTAL_MAP_NODES) + 100) + 'px';
     for (let i=1;i<=TOTAL_MAP_NODES;i++){
       const wrap = document.createElement('div');
       wrap.className = 'node-wrap';
