@@ -203,19 +203,7 @@
 
   .roadmap-scene { position: relative; padding: 20px 0 60px; min-height: 100px; }
 
-  #roadmapTrack {
-    position: relative; width: 100%; border-radius: 20px; overflow: hidden;
-    background-color: #6bbf58;
-    background-image:
-      linear-gradient(180deg, #bfe8ff 0px, #bfe8ff 50px, #7ecb6b 170px, #6bbf58 100%),
-      radial-gradient(circle, rgba(255,255,255,0.16) 2.5px, transparent 3px),
-      radial-gradient(circle, rgba(255,255,255,0.1) 1.6px, transparent 2px),
-      radial-gradient(circle, rgba(40,90,30,0.18) 2px, transparent 2.5px);
-    background-size: 100% 100%, 70px 70px, 46px 46px, 90px 90px;
-    background-position: 0 0, 0 0, 25px 35px, 45px 10px;
-    background-repeat: no-repeat, repeat, repeat, repeat;
-  }
-  .prop { position: absolute; z-index: 2; pointer-events: none; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.25)); }
+  #roadmapTrack { position: relative; width: 100%; }
 
   #roadSvg { position: absolute; top:0; left:0; z-index: 1; pointer-events: none; }
   .node-wrap { position: absolute; z-index: 3; transform: translate(-50%,-50%); }
@@ -894,7 +882,7 @@
     gemsVal.textContent = save.gems;
     roadmapTrack.innerHTML = '';
     roadmapTrack.style.height = (nodeY(TOTAL_MAP_NODES) + 100) + 'px';
-    renderProps(Math.ceil(TOTAL_MAP_NODES/3.4));
+    // decorative props removed — path now sits directly on the fixed background
     for (let i=1;i<=TOTAL_MAP_NODES;i++){
       const wrap = document.createElement('div');
       wrap.className = 'node-wrap';
