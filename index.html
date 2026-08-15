@@ -203,9 +203,22 @@
 
   .roadmap-scene { position: relative; padding: 20px 0 60px; min-height: 100px; }
 
-  #roadmapTrack { position: relative; width: 100%; }
+  #roadmapTrack {
+    position: relative; width: 100%; border-radius: 20px; overflow: hidden;
+    background-color: #6bbf58;
+    background-image:
+      linear-gradient(180deg, #bfe8ff 0px, #bfe8ff 50px, #7ecb6b 170px, #6bbf58 100%),
+      radial-gradient(circle, rgba(255,255,255,0.16) 2.5px, transparent 3px),
+      radial-gradient(circle, rgba(255,255,255,0.1) 1.6px, transparent 2px),
+      radial-gradient(circle, rgba(40,90,30,0.18) 2px, transparent 2.5px);
+    background-size: 100% 100%, 70px 70px, 46px 46px, 90px 90px;
+    background-position: 0 0, 0 0, 25px 35px, 45px 10px;
+    background-repeat: no-repeat, repeat, repeat, repeat;
+  }
+  .prop { position: absolute; z-index: 2; pointer-events: none; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.25)); }
+
   #roadSvg { position: absolute; top:0; left:0; z-index: 1; pointer-events: none; }
-  .node-wrap { position: absolute; z-index: 2; transform: translate(-50%,-50%); }
+  .node-wrap { position: absolute; z-index: 3; transform: translate(-50%,-50%); }
 
   .stone-shadow { position:absolute; width:54px; height:14px; background:rgba(20,30,10,0.28); border-radius:50%; bottom:-2px; left:50%; transform:translateX(-50%); filter: blur(2px); }
   .level-node {
@@ -242,9 +255,16 @@
   @keyframes nodeBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
   .tier-tag { position: absolute; top: -10px; right: -8px; background: var(--purple); color: #fff; font-size: 9px; font-family: var(--sans); font-weight: 800; padding: 3px 6px; border-radius: 8px; }
 
-  .char-marker { position: absolute; width: 46px; transform: translate(-50%,-102%); transition: left .6s cubic-bezier(.3,.9,.4,1), top .6s cubic-bezier(.3,.9,.4,1); z-index: 6; pointer-events: none; }
-  .dog-img { width: 100%; display: block; filter: drop-shadow(0 8px 6px rgba(0,0,0,0.35)); animation: dogIdle 1.4s ease-in-out infinite; transform-origin: bottom center; }
-  @keyframes dogIdle { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
+  .char-marker {
+    position: absolute; width: 58px; height: 58px; transform: translate(-50%,-118%); z-index: 6; pointer-events: none;
+    transition: left .6s cubic-bezier(.3,.9,.4,1), top .6s cubic-bezier(.3,.9,.4,1);
+    border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff8e0, #ffd88a);
+    border: 3px solid #fff; box-shadow: 0 0 0 4px #f2ab1f, 0 8px 14px rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    animation: dogIdle 1.4s ease-in-out infinite;
+  }
+  .dog-img { width: 90%; display: block; }
+  @keyframes dogIdle { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-3px) rotate(2deg); } }
 
   /* ---------- GAME ---------- */
   #view-game { width: 100%; height: 100%; }
@@ -355,10 +375,13 @@
     filter: drop-shadow(0 2px 2px rgba(120,70,0,0.5)) drop-shadow(0 0 5px rgba(255,210,60,0.6));
   }
   .node-stars {
-    position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 1px; z-index: 3; pointer-events: none;
+    position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 0px; z-index: 4; pointer-events: none;
   }
-  .node-stars span { font-size: 13px; }
+  .node-stars span { font-size: 14px; }
+  .node-stars span:nth-child(1) { transform: rotate(-18deg) translateY(3px); }
+  .node-stars span:nth-child(2) { transform: translateY(-3px); font-size: 17px; }
+  .node-stars span:nth-child(3) { transform: rotate(18deg) translateY(3px); }
 
   .win-stage { position: relative; height: 150px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 8px; overflow: visible; }
   .winner-dog {
@@ -836,10 +859,42 @@
   function nodeX(i){ return 50 + WAVE_AMPLITUDE * Math.sin(i * 0.8) + (Math.sin(i*0.29)*7); }
   function nodeY(i){ return 50 + (i-1) * NODE_SPACING; }
 
+  const PROP_SVGS = [
+    // circus tent
+    `<svg viewBox="0 0 80 80" width="58" height="58"><polygon points="40,6 66,44 14,44" fill="#eb5757"/><polygon points="40,6 53,44 40,44" fill="#c23a44"/><polygon points="40,6 27,44 40,44" fill="#ff8a8a"/><rect x="14" y="44" width="52" height="26" rx="3" fill="#fff6e0"/><rect x="14" y="44" width="52" height="8" fill="#4a90d9"/><circle cx="40" cy="4" r="3" fill="#f2c94c"/></svg>`,
+    // ticket booth
+    `<svg viewBox="0 0 80 80" width="54" height="54"><rect x="14" y="30" width="52" height="40" rx="4" fill="#f2c94c"/><polygon points="8,30 72,30 62,16 18,16" fill="#eb5757"/><rect x="26" y="42" width="28" height="18" rx="2" fill="#4a90d9"/><rect x="14" y="30" width="52" height="6" fill="#c4941f"/></svg>`,
+    // ice cream cart
+    `<svg viewBox="0 0 80 80" width="56" height="56"><rect x="10" y="34" width="54" height="26" rx="6" fill="#ff8a4c"/><rect x="10" y="34" width="54" height="8" fill="#fff"/><circle cx="22" cy="66" r="7" fill="#3d3126"/><circle cx="54" cy="66" r="7" fill="#3d3126"/><path d="M46 34 L52 14 L58 34Z" fill="#ffe27a"/><circle cx="52" cy="12" r="5" fill="#fff6e0"/></svg>`,
+    // target board
+    `<svg viewBox="0 0 80 80" width="50" height="50"><circle cx="40" cy="40" r="32" fill="#eb5757"/><circle cx="40" cy="40" r="23" fill="#fff6e0"/><circle cx="40" cy="40" r="14" fill="#4a90d9"/><circle cx="40" cy="40" r="6" fill="#f2c94c"/></svg>`,
+    // teddy bear
+    `<svg viewBox="0 0 80 80" width="52" height="52"><circle cx="22" cy="18" r="9" fill="#e8a352"/><circle cx="58" cy="18" r="9" fill="#e8a352"/><circle cx="40" cy="34" r="24" fill="#f0b46a"/><circle cx="40" cy="40" r="15" fill="#fff6e0"/><circle cx="31" cy="30" r="3.4" fill="#3d2b1a"/><circle cx="49" cy="30" r="3.4" fill="#3d2b1a"/><ellipse cx="40" cy="42" rx="5" ry="3.6" fill="#3d2b1a"/></svg>`
+  ];
+  function renderProps(count){
+    const frag = document.createDocumentFragment();
+    for (let p=0; p<count; p++){
+      const nodeIdx = 2 + p*3.4;
+      const y = nodeY(nodeIdx);
+      const side = p % 2 === 0 ? 1 : -1;
+      const baseX = nodeX(Math.round(nodeIdx));
+      const x = Math.max(8, Math.min(92, baseX + side*26));
+      const el = document.createElement('div');
+      el.className = 'prop';
+      el.style.left = x + '%';
+      el.style.top = y + 'px';
+      el.style.transform = 'translate(-50%,-50%)';
+      el.innerHTML = PROP_SVGS[p % PROP_SVGS.length];
+      frag.appendChild(el);
+    }
+    roadmapTrack.appendChild(frag);
+  }
+
   function renderRoadmap(){
     gemsVal.textContent = save.gems;
     roadmapTrack.innerHTML = '';
     roadmapTrack.style.height = (nodeY(TOTAL_MAP_NODES) + 100) + 'px';
+    renderProps(Math.ceil(TOTAL_MAP_NODES/3.4));
     for (let i=1;i<=TOTAL_MAP_NODES;i++){
       const wrap = document.createElement('div');
       wrap.className = 'node-wrap';
@@ -906,16 +961,16 @@
     if (points.length < 2) return;
     const d = smoothPath(points);
     const ns = 'http://www.w3.org/2000/svg';
-    const base = document.createElementNS(ns,'path');
-    base.setAttribute('d', d); base.setAttribute('stroke', '#d8cba8'); base.setAttribute('stroke-width', '15');
-    base.setAttribute('fill', 'none'); base.setAttribute('stroke-linecap','round'); base.setAttribute('stroke-linejoin','round');
     const edge = document.createElementNS(ns,'path');
-    edge.setAttribute('d', d); edge.setAttribute('stroke', '#c2b48c'); edge.setAttribute('stroke-width', '17');
+    edge.setAttribute('d', d); edge.setAttribute('stroke', '#7fa9b8'); edge.setAttribute('stroke-width', '19');
     edge.setAttribute('fill', 'none'); edge.setAttribute('stroke-linecap','round'); edge.setAttribute('stroke-linejoin','round');
-    edge.setAttribute('opacity','0.5');
+    edge.setAttribute('opacity','0.7');
+    const base = document.createElementNS(ns,'path');
+    base.setAttribute('d', d); base.setAttribute('stroke', '#cfe8ee'); base.setAttribute('stroke-width', '16');
+    base.setAttribute('fill', 'none'); base.setAttribute('stroke-linecap','round'); base.setAttribute('stroke-linejoin','round');
     const dash = document.createElementNS(ns,'path');
-    dash.setAttribute('d', d); dash.setAttribute('stroke', '#fff'); dash.setAttribute('stroke-width', '3');
-    dash.setAttribute('stroke-dasharray','11,11'); dash.setAttribute('fill','none');
+    dash.setAttribute('d', d); dash.setAttribute('stroke', '#fff'); dash.setAttribute('stroke-width', '3.2');
+    dash.setAttribute('stroke-dasharray','12,12'); dash.setAttribute('fill','none');
     dash.setAttribute('stroke-linecap','round'); dash.setAttribute('stroke-linejoin','round');
     svg.appendChild(edge); svg.appendChild(base); svg.appendChild(dash);
   }
