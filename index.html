@@ -842,10 +842,24 @@
   // ================= ROADMAP =================
   const roadmapTrack = document.getElementById('roadmapTrack');
   const gemsVal = document.getElementById('gemsVal');
+  const HERO_ASPECT = 1104/736;
+  const HERO_NODES = 6;
+  const HERO_FRAC = [
+    [0.60,0.54],[0.55,0.63],[0.48,0.71],[0.44,0.79],[0.47,0.87],[0.40,0.95]
+  ];
   const NODE_SPACING = 122;
   const WAVE_AMPLITUDE = 25;
-  function nodeX(i){ return 50 + WAVE_AMPLITUDE * Math.sin(i * 0.8) + (Math.sin(i*0.29)*7); }
-  function nodeY(i){ return 50 + (i-1) * NODE_SPACING; }
+  let heroHeightPx = 550;
+  function nodeX(i){
+    if (i <= HERO_NODES) return HERO_FRAC[i-1][0]*100;
+    const j = i - HERO_NODES;
+    return 50 + WAVE_AMPLITUDE * Math.sin(j * 0.8) + (Math.sin(j*0.29)*7);
+  }
+  function nodeY(i){
+    if (i <= HERO_NODES) return HERO_FRAC[i-1][1]*heroHeightPx;
+    const j = i - HERO_NODES;
+    return heroHeightPx + 30 + (j-1) * NODE_SPACING;
+  }
 
   const PROP_SVGS = [
     // circus tent
@@ -881,8 +895,13 @@
   function renderRoadmap(){
     gemsVal.textContent = save.gems;
     roadmapTrack.innerHTML = '';
+    heroHeightPx = (roadmapTrack.clientWidth || 400) * HERO_ASPECT;
     roadmapTrack.style.height = (nodeY(TOTAL_MAP_NODES) + 100) + 'px';
-    // decorative props removed — path now sits directly on the fixed background
+    roadmapTrack.style.backgroundColor = '#5fa832';
+    roadmapTrack.style.backgroundImage = "url('bg-path-hero.jpg')";
+    roadmapTrack.style.backgroundSize = '100% ' + heroHeightPx + 'px';
+    roadmapTrack.style.backgroundPosition = 'top center';
+    roadmapTrack.style.backgroundRepeat = 'no-repeat';
     for (let i=1;i<=TOTAL_MAP_NODES;i++){
       const wrap = document.createElement('div');
       wrap.className = 'node-wrap';
@@ -946,19 +965,23 @@
     const nodes = roadmapTrack.querySelectorAll('.level-node');
     const points = [];
     nodes.forEach(n => { const r = n.getBoundingClientRect(); points.push([ r.left + r.width/2 - sceneRect.left, r.top + r.height/2 - sceneRect.top ]); });
-    if (points.length < 2) return;
-    const d = smoothPath(points);
+    // Skip the hero region — its path is already painted into the background image.
+    // Only draw our own path starting from the last hero node onward.
+    const startIdx = Math.max(0, HERO_NODES - 1);
+    const continuePoints = points.slice(startIdx);
+    if (continuePoints.length < 2) return;
+    const d = smoothPath(continuePoints);
     const ns = 'http://www.w3.org/2000/svg';
     const edge = document.createElementNS(ns,'path');
-    edge.setAttribute('d', d); edge.setAttribute('stroke', '#7fa9b8'); edge.setAttribute('stroke-width', '19');
+    edge.setAttribute('d', d); edge.setAttribute('stroke', '#a9822f'); edge.setAttribute('stroke-width', '19');
     edge.setAttribute('fill', 'none'); edge.setAttribute('stroke-linecap','round'); edge.setAttribute('stroke-linejoin','round');
-    edge.setAttribute('opacity','0.7');
+    edge.setAttribute('opacity','0.55');
     const base = document.createElementNS(ns,'path');
-    base.setAttribute('d', d); base.setAttribute('stroke', '#cfe8ee'); base.setAttribute('stroke-width', '16');
+    base.setAttribute('d', d); base.setAttribute('stroke', '#e8bc57'); base.setAttribute('stroke-width', '16');
     base.setAttribute('fill', 'none'); base.setAttribute('stroke-linecap','round'); base.setAttribute('stroke-linejoin','round');
     const dash = document.createElementNS(ns,'path');
-    dash.setAttribute('d', d); dash.setAttribute('stroke', '#fff'); dash.setAttribute('stroke-width', '3.2');
-    dash.setAttribute('stroke-dasharray','12,12'); dash.setAttribute('fill','none');
+    dash.setAttribute('d', d); dash.setAttribute('stroke', '#fff6df'); dash.setAttribute('stroke-width', '3');
+    dash.setAttribute('stroke-dasharray','3,10'); dash.setAttribute('fill','none');
     dash.setAttribute('stroke-linecap','round'); dash.setAttribute('stroke-linejoin','round');
     svg.appendChild(edge); svg.appendChild(base); svg.appendChild(dash);
   }
