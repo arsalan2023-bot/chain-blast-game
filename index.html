@@ -243,6 +243,14 @@
   @keyframes nodeBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
   .tier-tag { position: absolute; top: -10px; right: -8px; background: var(--purple); color: #fff; font-size: 9px; font-family: var(--sans); font-weight: 800; padding: 3px 6px; border-radius: 8px; }
 
+  .castle-glow {
+    position: absolute; width: 260px; height: 260px; z-index: 1;
+    transform: translate(-50%,-50%);
+    background: radial-gradient(circle, rgba(255,214,107,0.55), rgba(255,180,60,0.25) 40%, transparent 70%);
+    animation: castlePulse 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes castlePulse { 0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1.15); } }
   .char-marker {
     position: absolute; width: 58px; height: 58px; transform: translate(-50%,-118%); z-index: 6; pointer-events: none;
     transition: left .6s cubic-bezier(.3,.9,.4,1), top .6s cubic-bezier(.3,.9,.4,1);
@@ -374,13 +382,14 @@
   .win-stage { position: relative; height: 150px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 8px; overflow: visible; }
   .winner-dog {
     width: 150px; position: relative; z-index: 3;
-    border-radius: 50%;
-    -webkit-mask-image: radial-gradient(circle, #000 58%, transparent 82%);
-    mask-image: radial-gradient(circle, #000 58%, transparent 82%);
     filter: drop-shadow(0 0 14px rgba(255,214,107,0.7)) drop-shadow(0 10px 10px rgba(0,0,0,0.3));
-    animation: dogJump 0.9s ease-in-out infinite, dogGlow 1s ease-in-out infinite alternate;
+    animation: handBurst 0.6s cubic-bezier(.2,1.4,.4,1) both, dogGlow 1s ease-in-out infinite alternate 0.6s;
   }
-  @keyframes dogJump { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-22px) rotate(3deg); } }
+  @keyframes handBurst {
+    0% { transform: translateY(60px) scale(0.7); opacity: 0; }
+    60% { transform: translateY(-10px) scale(1.05); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
   @keyframes dogGlow {
     from { filter: drop-shadow(0 0 8px rgba(255,214,107,0.55)) drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
     to { filter: drop-shadow(0 0 26px rgba(255,235,150,0.95)) drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
@@ -577,7 +586,7 @@
       <div class="firework fw2"></div>
       <div class="firework fw3"></div>
       <div class="firework fw4"></div>
-      <img src="dog-winner.png" class="winner-dog" alt="winner">
+      <img src="zombie-hand.png" class="winner-dog" alt="victory">
     </div>
     <div class="badge">Level Complete</div>
     <h1 id="levelUpTitle">Level 1 Cleared</h1>
@@ -613,7 +622,7 @@
   const TYPES_BASE = ['blue','green','yellow','red','purple'];
   const CLASS_MAP = { blue:'tok-blue', green:'tok-green', yellow:'tok-yellow', red:'tok-red', purple:'tok-purple' };
   const GLYPH_MAP = { blue:'●', green:'◆', yellow:'★', red:'■', purple:'◈' };
-  const TOTAL_MAP_NODES = 30;
+  const TOTAL_MAP_NODES = 50;
 
   function maskFull(){ const m=[]; for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++) m.push(true); return m; }
   function maskDiamond(){ const m=[]; const cx=3.5,cy=3.5; for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++) m.push(Math.abs(r-cy)+Math.abs(c-cx) <= 4.6); return m; }
@@ -842,24 +851,42 @@
   // ================= ROADMAP =================
   const roadmapTrack = document.getElementById('roadmapTrack');
   const gemsVal = document.getElementById('gemsVal');
-  const HERO_ASPECT = 1104/736;
-  const HERO_NODES = 6;
-  const HERO_FRAC = [
-    [0.60,0.54],[0.55,0.63],[0.48,0.71],[0.44,0.79],[0.47,0.87],[0.40,0.95]
-  ];
-  const NODE_SPACING = 122;
-  const WAVE_AMPLITUDE = 25;
-  let heroHeightPx = 550;
-  function nodeX(i){
-    if (i <= HERO_NODES) return HERO_FRAC[i-1][0]*100;
-    const j = i - HERO_NODES;
-    return 50 + WAVE_AMPLITUDE * Math.sin(j * 0.8) + (Math.sin(j*0.29)*7);
+  const BOARD_ASPECT = 3832/2160;
+  const CX = 0.50, CY = 0.44;
+  const OUTER_RX = 0.41, OUTER_RY = 0.231;
+  const INNER_RX = 0.28, INNER_RY = 0.158;
+  const TAIL_COUNT = 8;
+  const OUTER_COUNT = 21;
+  const INNER_COUNT = 21;
+  let boardHeightPx = 800;
+
+  function bezierPoint(p0, p1, p2, t){
+    const x = (1-t)*(1-t)*p0[0] + 2*(1-t)*t*p1[0] + t*t*p2[0];
+    const y = (1-t)*(1-t)*p0[1] + 2*(1-t)*t*p1[1] + t*t*p2[1];
+    return [x,y];
   }
-  function nodeY(i){
-    if (i <= HERO_NODES) return HERO_FRAC[i-1][1]*heroHeightPx;
-    const j = i - HERO_NODES;
-    return heroHeightPx + 30 + (j-1) * NODE_SPACING;
+
+  function nodeFrac(i){
+    // i is 1-based level number
+    if (i <= TAIL_COUNT){
+      const t = (i-1)/(TAIL_COUNT-1);
+      return bezierPoint([0.18,0.80],[0.50,0.74],[0.84,0.52], t);
+    }
+    if (i <= TAIL_COUNT + OUTER_COUNT){
+      const j = i - TAIL_COUNT - 1;
+      const t = j/(OUTER_COUNT-1);
+      const angleDeg = 100 + t*340;
+      const a = angleDeg * Math.PI/180;
+      return [ CX + OUTER_RX*Math.cos(a), CY + OUTER_RY*Math.sin(a) ];
+    }
+    const j = i - TAIL_COUNT - OUTER_COUNT - 1;
+    const t = j/(INNER_COUNT-1);
+    const angleDeg = 290 + t*340; // ends at 630 = 270 (top, matches the arrow)
+    const a = angleDeg * Math.PI/180;
+    return [ CX + INNER_RX*Math.cos(a), CY + INNER_RY*Math.sin(a) ];
   }
+  function nodeX(i){ return nodeFrac(i)[0]*100; }
+  function nodeY(i){ return nodeFrac(i)[1]*boardHeightPx; }
 
   const PROP_SVGS = [
     // circus tent
@@ -895,13 +922,22 @@
   function renderRoadmap(){
     gemsVal.textContent = save.gems;
     roadmapTrack.innerHTML = '';
-    heroHeightPx = (roadmapTrack.clientWidth || 400) * HERO_ASPECT;
-    roadmapTrack.style.height = (nodeY(TOTAL_MAP_NODES) + 100) + 'px';
-    roadmapTrack.style.backgroundColor = '#5fa832';
-    roadmapTrack.style.backgroundImage = "url('bg-path-hero.jpg')";
-    roadmapTrack.style.backgroundSize = '100% ' + heroHeightPx + 'px';
+    boardHeightPx = (roadmapTrack.clientWidth || 400) * BOARD_ASPECT;
+    roadmapTrack.style.height = boardHeightPx + 'px';
+    roadmapTrack.style.backgroundColor = '#1a2213';
+    roadmapTrack.style.backgroundImage = "url('spiral-board.jpg')";
+    roadmapTrack.style.backgroundSize = '100% ' + boardHeightPx + 'px';
     roadmapTrack.style.backgroundPosition = 'top center';
     roadmapTrack.style.backgroundRepeat = 'no-repeat';
+
+    if (save.unlockedLevel > TOTAL_MAP_NODES){
+      const glow = document.createElement('div');
+      glow.className = 'castle-glow';
+      glow.style.left = (CX*100) + '%';
+      glow.style.top = (CY*boardHeightPx) + 'px';
+      roadmapTrack.appendChild(glow);
+    }
+
     for (let i=1;i<=TOTAL_MAP_NODES;i++){
       const wrap = document.createElement('div');
       wrap.className = 'node-wrap';
@@ -914,7 +950,6 @@
       else if (i === save.unlockedLevel) state = 'current';
       node.className = 'level-node ' + state;
       node.textContent = i;
-      if (i % 5 === 0){ const tag = document.createElement('div'); tag.className = 'tier-tag'; tag.textContent = 'T' + (Math.floor((i-1)/5)+1); node.appendChild(tag); }
       if (state !== 'locked') node.addEventListener('click', () => { playUiSound(); openPreLevel(i); });
       wrap.appendChild(shadow);
       wrap.appendChild(node);
@@ -926,7 +961,7 @@
       if (state === 'current') {
         const marker = document.createElement('div');
         marker.className = 'char-marker';
-        marker.innerHTML = `<img src="dog-marker.png" alt="dog" class="dog-img">`;
+        marker.innerHTML = `<img src="pumpkin.png" alt="pumpkin" class="dog-img">`;
         wrap.appendChild(marker);
       }
       roadmapTrack.appendChild(wrap);
@@ -1387,7 +1422,7 @@
     const starCount = movesLeftRatio >= 0.4 ? 3 : movesLeftRatio >= 0.15 ? 2 : 1;
     const gemsEarned = 10 + tierOf(level)*3 + starCount*5;
     save.gems += gemsEarned;
-    if (level === save.unlockedLevel && level < TOTAL_MAP_NODES) save.unlockedLevel = level+1;
+    if (level === save.unlockedLevel) save.unlockedLevel = level+1;
     if (!save.levelStars[level] || save.levelStars[level] < starCount) save.levelStars[level] = starCount;
     writeSave();
     document.getElementById('levelUpTitle').textContent = `Level ${level} Cleared`;
