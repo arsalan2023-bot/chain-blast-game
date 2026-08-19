@@ -22,7 +22,8 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
   html, body { height: 100%; overflow: hidden; font-family: var(--sans); color: var(--text); touch-action: none; }
   #bgScene {
-    position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #0d1b12;
+    position: fixed; inset: 0; z-index: 0; overflow: hidden;
+    background: radial-gradient(circle at 50% 30%, #3a2413, #150d08 75%);
   }
   .scene-img {
     position: absolute; inset: -4%; width: 108%; height: 108%;
@@ -202,45 +203,32 @@
   @keyframes mysteryFloat { 0%,100%{ transform: translateY(0) rotate(-3deg); } 50%{ transform: translateY(-6px) rotate(3deg); } }
 
   .roadmap-scene { position: relative; padding: 20px 0 60px; min-height: 100px; }
+  .board-video { position: absolute; top: 20px; left: 0; width: 100%; z-index: 0; pointer-events: none; display: block; }
 
   #roadmapTrack { position: relative; width: 100%; }
 
   #roadSvg { position: absolute; top:0; left:0; z-index: 1; pointer-events: none; }
   .node-wrap { position: absolute; z-index: 3; transform: translate(-50%,-50%); }
 
-  .stone-shadow { position:absolute; width:54px; height:14px; background:rgba(20,30,10,0.28); border-radius:50%; bottom:-2px; left:50%; transform:translateX(-50%); filter: blur(2px); }
+  .stone-shadow { display: none; }
   .level-node {
-    width: 64px; height: 64px;
-    border-radius: 46% 54% 51% 49% / 48% 44% 56% 52%;
+    width: 30px; height: 30px;
+    border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--title); font-weight: 800; font-size: 20px;
-    background-color: #8c8478;
-    background-image: url('rock.jpg');
-    background-size: 150%; background-position: 50% 42%; background-repeat: no-repeat;
-    color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); position: relative; cursor: pointer;
-    box-shadow: 0 7px 0 #5c554a, 0 12px 18px rgba(0,0,0,0.35), inset 0 2px 3px rgba(255,255,255,0.4);
-    border: 2px solid rgba(255,255,255,0.35);
+    font-family: var(--title); font-weight: 800; font-size: 12.5px;
+    background: rgba(20,14,8,0.6);
+    color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.9); position: relative; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.55);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
   }
-  .level-node::after {
-    content:''; position:absolute; inset:0; border-radius: inherit;
-    background: rgba(140,132,120,0.28);
-  }
-  .level-node > * { position: relative; z-index: 2; }
-  .level-node::before {
-    content:''; position:absolute; width:9px; height:2.4px; background:rgba(60,50,35,0.35); border-radius:2px;
-    top: 38%; left: 22%; transform: rotate(-18deg); box-shadow: 14px 9px 0 -0.5px rgba(60,50,35,0.28), 6px 20px 0 -0.8px rgba(60,50,35,0.22);
-    z-index: 2;
-  }
-  .level-node.done::after { background: rgba(111,194,60,0.22); }
-  .level-node.done { box-shadow: 0 7px 0 #2e5c1a, 0 12px 18px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.4); }
-  .level-node.current::after { background: rgba(242,171,31,0.22); }
+  .level-node.done { background: rgba(111,194,60,0.65); border-color: #eafce0; }
   .level-node.current {
-    box-shadow: 0 7px 0 #a1650b, 0 0 0 8px rgba(255,214,107,0.35), inset 0 2px 3px rgba(255,255,255,0.5);
+    background: rgba(242,171,31,0.75); border-color: #fff2cf;
+    box-shadow: 0 0 0 6px rgba(255,214,107,0.4), 0 3px 8px rgba(0,0,0,0.5);
     animation: nodeBounce 1.4s ease-in-out infinite;
   }
-  .level-node.locked { filter: grayscale(0.6) brightness(0.75); cursor: default; box-shadow: 0 5px 0 #5c554a; }
-  .level-node.locked::after { background: rgba(60,55,45,0.35); }
-  @keyframes nodeBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  .level-node.locked { background: rgba(20,14,8,0.5); border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.55); cursor: default; }
+  @keyframes nodeBounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
   .tier-tag { position: absolute; top: -10px; right: -8px; background: var(--purple); color: #fff; font-size: 9px; font-family: var(--sans); font-weight: 800; padding: 3px 6px; border-radius: 8px; }
 
   .castle-glow {
@@ -428,22 +416,7 @@
 </head>
 <body>
 
-<div id="bgScene" class="bg-scene">
-  <div class="scene-img"></div>
-  <div class="train-motion">
-    <div class="headlight-glow"></div>
-    <div class="cabin-glow"></div>
-    <div class="smoke-wrap">
-      <div class="puff"></div><div class="puff"></div><div class="puff"></div><div class="puff"></div>
-    </div>
-  </div>
-  <div class="girl-sway"><div class="wave-arm"></div></div>
-  <div class="flowers"></div>
-  <div class="clouds"></div>
-  <div class="bird bird1"></div>
-  <div class="bird bird2"></div>
-  <div class="bird bird3"></div>
-</div>
+<div id="bgScene" class="bg-scene"></div>
 
 <!-- START -->
 <div class="view active" id="view-start">
@@ -473,6 +446,7 @@
   <div class="map-scroll" id="mapScroll">
     <div class="tab-panel" id="panel-map">
       <div class="roadmap-scene" id="roadmapScene">
+        <video id="boardVideo" class="board-video" src="spiral-board.mp4" poster="spiral-board.jpg" autoplay loop muted playsinline></video>
         <svg id="roadSvg"></svg>
         <div id="roadmapTrack"></div>
         <div class="mystery-rock hidden" id="mysteryRock"></div>
@@ -731,39 +705,15 @@
     src.connect(filter).connect(gain).connect(audioCtx.destination);
     src.start();
   }
-  // Nature-adventure loop: gentle plucked melody over a soft pad, with occasional bird chirps
-  const NATURE_PAD = [130.8, 130.8, 174.6, 146.8];
-  const NATURE_MELODY = [523.3, 587.3, 659.3, 587.3, 523.3, 440, 493.9, 440, 523.3, 659.3, 587.3, 493.9];
-  let musicStep=0;
-  function playBirdChirp(){
-    if (!audioCtx || !musicOn) return;
-    const t0 = audioCtx.currentTime;
-    const notes = [2200, 2600, 2100];
-    notes.forEach((f,i) => {
-      const delay = i*0.07;
-      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(f, t0+delay);
-      osc.frequency.exponentialRampToValueAtTime(f*1.3, t0+delay+0.05);
-      osc.frequency.exponentialRampToValueAtTime(f*0.8, t0+delay+0.09);
-      gain.gain.setValueAtTime(0, t0+delay);
-      gain.gain.linearRampToValueAtTime(0.045, t0+delay+0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, t0+delay+0.11);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start(t0+delay); osc.stop(t0+delay+0.13);
-    });
-  }
+  // Background music: real audio track extracted from the roadmap clip, looped
+  const themeAudio = new Audio('spiral-theme.mp3');
+  themeAudio.loop = true;
+  themeAudio.volume = 0.55;
   function musicLoop(){
-    if(!musicOn) return;
-    const padNote = NATURE_PAD[Math.floor(musicStep/4) % NATURE_PAD.length];
-    if (musicStep % 4 === 0) playTone(padNote, 1.9, 'sine', 0.05, 0);
-    const mel = NATURE_MELODY[musicStep % NATURE_MELODY.length];
-    playTone(mel, 0.5, 'triangle', 0.055, 0.03);
-    if (musicStep % 7 === 3 && Math.random() < 0.8) playBirdChirp();
-    musicStep++;
-    musicTimer = setTimeout(musicLoop, 480);
+    if (!musicOn) return;
+    themeAudio.play().catch(()=>{});
   }
-  function stopMusic(){ clearTimeout(musicTimer); musicTimer=null; }
+  function stopMusic(){ themeAudio.pause(); }
   function playMatchSound(count){ if(!audioCtx||!musicOn) return; const base=440+count*30; playTone(base,0.28,'triangle',0.11,0); playTone(base*1.5,0.22,'sine',0.08,0.05); }
   function playBombSound(){
     if(!audioCtx||!musicOn) return;
@@ -782,7 +732,7 @@
   function playWinSound(){ if(!audioCtx||!musicOn) return; [523,659,784,988].forEach((f,i)=>playTone(f,0.32,'triangle',0.1,i*0.09)); }
   document.getElementById('muteBtnMap').addEventListener('click', () => {
     musicOn=!musicOn; document.getElementById('muteBtnMap').textContent = musicOn?'♪':'✕';
-    if(musicOn){ ensureAudio(); if(!musicTimer) musicLoop(); } else stopMusic();
+    if(musicOn){ ensureAudio(); musicLoop(); } else stopMusic();
   });
 
   // ================= GOOGLE SIGN-IN (optional) =================
@@ -851,7 +801,7 @@
   // ================= ROADMAP =================
   const roadmapTrack = document.getElementById('roadmapTrack');
   const gemsVal = document.getElementById('gemsVal');
-  const BOARD_ASPECT = 3832/2160;
+  const BOARD_ASPECT = 1280/720;
   const CX = 0.50, CY = 0.44;
   const OUTER_RX = 0.41, OUTER_RY = 0.231;
   const INNER_RX = 0.28, INNER_RY = 0.158;
